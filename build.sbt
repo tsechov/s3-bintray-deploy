@@ -41,7 +41,6 @@ lazy val root = (project in file(".")).
       "org.rauschig" % "jarchivelib" % "0.7.1",
       "com.jfrog.bintray.client" % "bintray-client-java-api" % bintrayClientVersion,
       "com.jfrog.bintray.client" % "bintray-client-java-service" % bintrayClientVersion,
-      //      "io.reactivex" % "rxscala_2.11" % "0.26.0",
       "io.reactivex" % "rxjava" % "1.1.3",
       "org.apache.maven" % "maven-model" % mavenVersion,
       "org.apache.maven" % "maven-core" % mavenVersion,
@@ -90,24 +89,6 @@ assemblyMergeStrategy in assembly := {
 com.updateimpact.Plugin.openBrowser in ThisBuild := true
 
 
-// we hide the existing definition for setReleaseVersion to replace it with our own
-//import sbtrelease.ReleaseStateTransformations.{setReleaseVersion => _, _}
-//
-//def setVersionOnly(selectVersion: Versions => String): ReleaseStep = { st: State =>
-//  val vs = st.get(ReleaseKeys.versions).getOrElse(sys.error("No versions are set! Was this release part executed before inquireVersions?"))
-//  val selected = selectVersion(vs)
-//
-//  st.log.info("Setting version to '%s'." format selected)
-//  val useGlobal = Project.extract(st).get(releaseUseGlobalVersion)
-//  val versionStr = (if (useGlobal) globalVersionString else versionString) format selected
-//
-//  reapply(Seq(
-//    if (useGlobal) version in ThisBuild := selected
-//    else version := selected
-//  ), st)
-//}
-//
-//lazy val setReleaseVersion: ReleaseStep = setVersionOnly(_._1)
 
 
 

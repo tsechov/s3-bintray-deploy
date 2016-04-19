@@ -83,11 +83,12 @@ lazy val root = (project in file(".")).
       checkSnapshotDependencies,
       inquireVersions,
       setReleaseVersion,
-      setNextVersion,
       runTest,
       tagRelease,
       // publishArtifacts,
       ReleaseStep(releaseStepTask(publish in Universal)),
+      pushChanges,
+      setNextVersion,
       pushChanges
     )
 

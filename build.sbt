@@ -28,7 +28,6 @@ lazy val root = (project in file(".")).
   enablePlugins(BuildInfoPlugin, GitVersioning, GitBranchPrompt, JavaAppPackaging).
   settings(
     name := "s3-bintray-deploy",
-//    version := "1.0.0-SNAPSHOT",
     scalaVersion := "2.11.7",
     retrieveManaged := true,
     libraryDependencies ++= Seq(
@@ -54,7 +53,7 @@ lazy val root = (project in file(".")).
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
     buildInfoPackage := "hu.blackbelt.cd.bintray.deploy",
 
-    publishTo := Some("temp" at "file:///tmp/repository"),
+    publishTo := Some(Resolver.file("file", new File(target.value.absolutePath + "/publish"))),
 
     assemblyJarName in assembly := s"${name.value}-${releaseVersion.value}.jar",
 
@@ -84,6 +83,7 @@ lazy val root = (project in file(".")).
       checkSnapshotDependencies,
       inquireVersions,
       setReleaseVersion,
+      setNextVersion,
       runTest,
       tagRelease,
       // publishArtifacts,

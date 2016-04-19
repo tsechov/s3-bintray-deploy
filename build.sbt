@@ -3,8 +3,6 @@ import com.typesafe.sbt.GitPlugin.autoImport._
 import sbt.Keys._
 import sbtassembly.AssemblyPlugin.autoImport._
 import sbtbuildinfo.BuildInfoPlugin.autoImport._
-import sbtrelease.ReleasePlugin.autoImport._
-import sbtrelease.ReleaseStateTransformations._
 
 
 val requiredJavaVersion: String = "1.8"
@@ -74,42 +72,22 @@ lazy val root = (project in file(".")).
       case x => MergeStrategy.first
     },
 
-//    assemblyJarName in assembly := s"${name.value}-${releaseVersion.value}.jar",
-
-//    mappings in Universal <<= (mappings in Universal, assembly in Compile) map { (mappings, fatJar) =>
-//      val filtered = mappings filter { case (file, name) => !name.endsWith(".jar") }
-//      filtered :+ (fatJar -> ("lib/" + fatJar.getName))
-//    },
-//    scriptClasspath := Seq((assemblyJarName in assembly).value),
-//    artifact in (Compile, assembly) ~= { art =>
-//      art.copy(`classifier` = Some("assembly"))
-//    },
-    artifact in (Compile, assembly) := {
-      val art = (artifact in (Compile, assembly)).value
+    artifact in(Compile, assembly) := {
+      val art = (artifact in(Compile, assembly)).value
       art.copy(`classifier` = Some("assembly"))
     },
-    addArtifact(artifact in (Compile, assembly), assembly),
+    addArtifact(artifact in(Compile, assembly), assembly),
 
 
     git.useGitDescribe := true,
     git.baseVersion := "0.0.0",
 
-//    publishTo := Some("Blackbelt lambdas" atS3 "s3://bb-lambdas")
-    publishTo := Some(Resolver.file("file", new File(target.value.absolutePath + "/publish")))
-
-//    , releaseProcess := Seq(
-//      checkSnapshotDependencies,
-//      inquireVersions,
-//      setReleaseVersion,
-//      runTest,
-//      tagRelease,
-//
-//      ReleaseStep(releaseStepTask(publish in assembly)),
-//      pushChanges,
-//      setNextVersion,
-//      commitNextVersion,
-//      pushChanges
-//    )
+    publishTo := Some("Blackbelt lambdas" atS3 "s3://bb-lambdas"),
+    //    publishTo := Some(Resolver.file("file", new File(target.value.absolutePath + "/publish"))),
+    publishConfiguration ~= { config =>
+      val newArts = config.artifacts.filterKeys(_.`classifier` == Some("assembly"))
+      new PublishConfiguration(config.ivyFile, config.resolverName, newArts, config.checksums, config.logging)
+    }
 
   )
 

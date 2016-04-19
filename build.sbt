@@ -1,5 +1,9 @@
+import com.typesafe.sbt.GitPlugin.autoImport._
 import sbtassembly.AssemblyPlugin.autoImport._
 import sbtbuildinfo.BuildInfoPlugin.autoImport._
+import sbtrelease.ReleasePlugin.autoImport._
+import sbtrelease.ReleaseStateTransformations.{setReleaseVersion => _, _}
+import sbtrelease._
 
 val requiredJavaVersion: String = "1.8"
 initialize := {
@@ -19,6 +23,7 @@ val bintrayClientVersion: String = "0.8.3"
 val awsSdkVersion: String = "1.1.0"
 
 val mavenVersion: String = "3.3.9"
+val VersionRegex = "v([0-9]+.[0-9]+.[0-9]+)-?(.*)?".r
 lazy val root = (project in file(".")).
   enablePlugins(BuildInfoPlugin, GitVersioning, GitBranchPrompt, JavaAppPackaging).
   settings(
@@ -51,11 +56,40 @@ lazy val root = (project in file(".")).
 
     publishTo := Some("temp" at "file:///tmp/repository"),
 
+    assemblyJarName in assembly := s"${name.value}-${releaseVersion.value}.jar",
+
     mappings in Universal <<= (mappings in Universal, assembly in Compile) map { (mappings, fatJar) =>
       val filtered = mappings filter { case (file, name) => !name.endsWith(".jar") }
       filtered :+ (fatJar -> ("lib/" + fatJar.getName))
     },
-    scriptClasspath := Seq((jarName in assembly).value)
+    scriptClasspath := Seq((assemblyJarName in assembly).value),
+
+    git.useGitDescribe := true,
+    git.baseVersion := "0.0.0",
+
+
+    git.gitTagToVersionNumber := {
+      case VersionRegex(v, "") => Some(v)
+      case VersionRegex(v, "SNAPSHOT") => Some(s"$v-SNAPSHOT")
+      case VersionRegex(v, s) => Some(s"$v-$s-SNAPSHOT")
+      case _ => None
+    },
+    releaseVersion <<= (releaseVersionBump) (bumper => {
+      ver => Version(ver)
+        .map(_.withoutQualifier)
+        .map(_.bump(bumper).string).getOrElse(versionFormatError)
+    }),
+
+    releaseProcess := Seq(
+      checkSnapshotDependencies,
+      inquireVersions,
+      setReleaseVersion,
+      runTest,
+      tagRelease,
+      // publishArtifacts,
+      ReleaseStep(releaseStepTask(publish in Universal)),
+      pushChanges
+    )
 
   )
 
@@ -66,18 +100,6 @@ assemblyMergeStrategy in assembly := {
 
 com.updateimpact.Plugin.openBrowser in ThisBuild := true
 
-git.useGitDescribe := true
-git.baseVersion := "0.0.0"
-
-val VersionRegex = "v([0-9]+.[0-9]+.[0-9]+)-?(.*)?".r
-git.gitTagToVersionNumber := {
-  case VersionRegex(v, "") => Some(v)
-  case VersionRegex(v, "SNAPSHOT") => Some(s"$v-SNAPSHOT")
-  case VersionRegex(v, s) => Some(s"$v-$s-SNAPSHOT")
-  case _ => None
-}
-
-import sbtrelease._
 
 // we hide the existing definition for setReleaseVersion to replace it with our own
 import sbtrelease.ReleaseStateTransformations.{setReleaseVersion => _, _}
@@ -98,22 +120,7 @@ def setVersionOnly(selectVersion: Versions => String): ReleaseStep = { st: State
 
 lazy val setReleaseVersion: ReleaseStep = setVersionOnly(_._1)
 
-releaseVersion <<= (releaseVersionBump) (bumper => {
-  ver => Version(ver)
-    .map(_.withoutQualifier)
-    .map(_.bump(bumper).string).getOrElse(versionFormatError)
-})
 
-releaseProcess := Seq(
-  checkSnapshotDependencies,
-  inquireVersions,
-  setReleaseVersion,
-  runTest,
-  tagRelease,
-  // publishArtifacts,
-  //  ReleaseStep(releaseStepTask(publish in Universal)),
-  pushChanges
-)
 
 
 

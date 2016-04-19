@@ -2,8 +2,9 @@ import com.typesafe.sbt.GitPlugin.autoImport._
 import sbtassembly.AssemblyPlugin.autoImport._
 import sbtbuildinfo.BuildInfoPlugin.autoImport._
 import sbtrelease.ReleasePlugin.autoImport._
-import sbtrelease.ReleaseStateTransformations.{setReleaseVersion => _, _}
+import sbtrelease.ReleaseStateTransformations._
 import sbtrelease._
+
 
 val requiredJavaVersion: String = "1.8"
 initialize := {
@@ -66,26 +67,12 @@ lazy val root = (project in file(".")).
     git.useGitDescribe := true,
     git.baseVersion := "0.0.0",
 
-
-    git.gitTagToVersionNumber := {
-      case VersionRegex(v, "") => Some(v)
-      case VersionRegex(v, "SNAPSHOT") => Some(s"$v-SNAPSHOT")
-      case VersionRegex(v, s) => Some(s"$v-$s-SNAPSHOT")
-      case _ => None
-    },
-    releaseVersion <<= (releaseVersionBump) (bumper => {
-      ver => Version(ver)
-        .map(_.withoutQualifier)
-        .map(_.bump(bumper).string).getOrElse(versionFormatError)
-    }),
-
     releaseProcess := Seq(
       checkSnapshotDependencies,
       inquireVersions,
       setReleaseVersion,
       runTest,
       tagRelease,
-      // publishArtifacts,
       ReleaseStep(releaseStepTask(publish in Universal)),
       pushChanges,
       setNextVersion,
@@ -104,23 +91,23 @@ com.updateimpact.Plugin.openBrowser in ThisBuild := true
 
 
 // we hide the existing definition for setReleaseVersion to replace it with our own
-import sbtrelease.ReleaseStateTransformations.{setReleaseVersion => _, _}
-
-def setVersionOnly(selectVersion: Versions => String): ReleaseStep = { st: State =>
-  val vs = st.get(ReleaseKeys.versions).getOrElse(sys.error("No versions are set! Was this release part executed before inquireVersions?"))
-  val selected = selectVersion(vs)
-
-  st.log.info("Setting version to '%s'." format selected)
-  val useGlobal = Project.extract(st).get(releaseUseGlobalVersion)
-  val versionStr = (if (useGlobal) globalVersionString else versionString) format selected
-
-  reapply(Seq(
-    if (useGlobal) version in ThisBuild := selected
-    else version := selected
-  ), st)
-}
-
-lazy val setReleaseVersion: ReleaseStep = setVersionOnly(_._1)
+//import sbtrelease.ReleaseStateTransformations.{setReleaseVersion => _, _}
+//
+//def setVersionOnly(selectVersion: Versions => String): ReleaseStep = { st: State =>
+//  val vs = st.get(ReleaseKeys.versions).getOrElse(sys.error("No versions are set! Was this release part executed before inquireVersions?"))
+//  val selected = selectVersion(vs)
+//
+//  st.log.info("Setting version to '%s'." format selected)
+//  val useGlobal = Project.extract(st).get(releaseUseGlobalVersion)
+//  val versionStr = (if (useGlobal) globalVersionString else versionString) format selected
+//
+//  reapply(Seq(
+//    if (useGlobal) version in ThisBuild := selected
+//    else version := selected
+//  ), st)
+//}
+//
+//lazy val setReleaseVersion: ReleaseStep = setVersionOnly(_._1)
 
 
 

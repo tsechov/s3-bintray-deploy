@@ -68,7 +68,10 @@ lazy val root = (project in file(".")).
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
     buildInfoPackage := "hu.blackbelt.cd.bintray.deploy",
 
-    //    publishTo := Some(Resolver.file("file", new File(target.value.absolutePath + "/publish"))),
+    assemblyMergeStrategy in assembly := {
+      case PathList("META-INF", xs@_*) => MergeStrategy.discard
+      case x => MergeStrategy.first
+    },
 
     assemblyJarName in assembly := s"${name.value}-${releaseVersion.value}.jar",
 
@@ -89,7 +92,7 @@ lazy val root = (project in file(".")).
       setReleaseVersion,
       runTest,
       tagRelease,
-      ReleaseStep(releaseStepTask(publish in Universal)),
+      ReleaseStep(releaseStepTask(publish in assembly)),
       pushChanges,
       setNextVersion,
       commitNextVersion,
@@ -98,10 +101,7 @@ lazy val root = (project in file(".")).
 
   )
 
-assemblyMergeStrategy in assembly := {
-  case PathList("META-INF", xs@_*) => MergeStrategy.discard
-  case x => MergeStrategy.first
-}
+
 
 com.updateimpact.Plugin.openBrowser in ThisBuild := true
 

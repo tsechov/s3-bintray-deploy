@@ -28,7 +28,7 @@ lazy val root = (project in file(".")).
   enablePlugins(BuildInfoPlugin, GitVersioning, GitBranchPrompt, JavaAppPackaging).
   settings(
     name := "s3-bintray-deploy",
-    version := "1.0.0-SNAPSHOT",
+//    version := "1.0.0-SNAPSHOT",
     scalaVersion := "2.11.7",
     retrieveManaged := true,
     libraryDependencies ++= Seq(

@@ -1,5 +1,6 @@
 
 import com.typesafe.sbt.GitPlugin.autoImport._
+import sbt.Keys._
 import sbtassembly.AssemblyPlugin.autoImport._
 import sbtbuildinfo.BuildInfoPlugin.autoImport._
 import sbtrelease.ReleasePlugin.autoImport._
@@ -89,7 +90,8 @@ lazy val root = (project in file(".")).
     git.useGitDescribe := true,
     git.baseVersion := "0.0.0",
 
-    publishTo := Some("Blackbelt lambdas" atS3 "s3://bb-lambdas")
+//    publishTo := Some("Blackbelt lambdas" atS3 "s3://bb-lambdas")
+    publishTo := Some(Resolver.file("file", new File(target.value.absolutePath + "/publish")))
 
 //    , releaseProcess := Seq(
 //      checkSnapshotDependencies,

@@ -89,21 +89,21 @@ lazy val root = (project in file(".")).
     git.useGitDescribe := true,
     git.baseVersion := "0.0.0",
 
-    publishTo := Some("Blackbelt lambdas" atS3 "s3://bb-lambdas"),
+    publishTo := Some("Blackbelt lambdas" atS3 "s3://bb-lambdas")
 
-    releaseProcess := Seq(
-      checkSnapshotDependencies,
-      inquireVersions,
-      setReleaseVersion,
-      runTest,
-      tagRelease,
-
-      ReleaseStep(releaseStepTask(publish in assembly)),
-      pushChanges,
-      setNextVersion,
-      commitNextVersion,
-      pushChanges
-    )
+//    , releaseProcess := Seq(
+//      checkSnapshotDependencies,
+//      inquireVersions,
+//      setReleaseVersion,
+//      runTest,
+//      tagRelease,
+//
+//      ReleaseStep(releaseStepTask(publish in assembly)),
+//      pushChanges,
+//      setNextVersion,
+//      commitNextVersion,
+//      pushChanges
+//    )
 
   )
 

@@ -14,6 +14,6 @@ addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.3")
 
 addSbtPlugin("com.typesafe.sbt" %% "sbt-native-packager" % "1.0.4")
 
-addSbtPlugin("ohnosequences" % "sbt-s3-resolver" % "0.14.0")
+addSbtPlugin("com.frugalmechanic" % "fm-sbt-s3-resolver" % "0.9.0")
 
 

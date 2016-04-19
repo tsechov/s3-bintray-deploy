@@ -89,6 +89,7 @@ lazy val root = (project in file(".")).
       ReleaseStep(releaseStepTask(publish in Universal)),
       pushChanges,
       setNextVersion,
+      commitNextVersion,
       pushChanges
     )
 

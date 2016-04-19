@@ -41,7 +41,7 @@ val awsSdkVersion: String = "1.1.0"
 val mavenVersion: String = "3.3.9"
 val VersionRegex = "v([0-9]+.[0-9]+.[0-9]+)-?(.*)?".r
 lazy val root = (project in file(".")).
-  enablePlugins(BuildInfoPlugin, GitVersioning, GitBranchPrompt, JavaAppPackaging).
+  enablePlugins(BuildInfoPlugin, GitVersioning, GitBranchPrompt).
   settings(
     name := "s3-bintray-deploy",
     scalaVersion := "2.11.7",
@@ -73,14 +73,16 @@ lazy val root = (project in file(".")).
       case x => MergeStrategy.first
     },
 
-    assemblyJarName in assembly := s"${name.value}-${releaseVersion.value}.jar",
+//    assemblyJarName in assembly := s"${name.value}-${releaseVersion.value}.jar",
 
 //    mappings in Universal <<= (mappings in Universal, assembly in Compile) map { (mappings, fatJar) =>
 //      val filtered = mappings filter { case (file, name) => !name.endsWith(".jar") }
 //      filtered :+ (fatJar -> ("lib/" + fatJar.getName))
 //    },
 //    scriptClasspath := Seq((assemblyJarName in assembly).value),
-
+//    artifact in (Compile, assembly) ~= { art =>
+//      art.copy(`classifier` = Some("assembly"))
+//    },
     addArtifact(artifact in (Compile, assembly), assembly),
 
 

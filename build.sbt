@@ -84,6 +84,10 @@ lazy val root = (project in file(".")).
 //    artifact in (Compile, assembly) ~= { art =>
 //      art.copy(`classifier` = Some("assembly"))
 //    },
+    artifact in (Compile, assembly) := {
+      val art = (artifact in (Compile, assembly)).value
+      art.copy(`classifier` = Some("assembly"))
+    },
     addArtifact(artifact in (Compile, assembly), assembly),
 
 

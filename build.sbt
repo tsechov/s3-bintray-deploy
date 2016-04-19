@@ -1,9 +1,10 @@
+
 import com.typesafe.sbt.GitPlugin.autoImport._
+import ohnosequences.sbt.SbtS3Resolver.autoImport._
 import sbtassembly.AssemblyPlugin.autoImport._
 import sbtbuildinfo.BuildInfoPlugin.autoImport._
 import sbtrelease.ReleasePlugin.autoImport._
 import sbtrelease.ReleaseStateTransformations._
-import sbtrelease._
 
 
 val requiredJavaVersion: String = "1.8"
@@ -11,10 +12,26 @@ initialize := {
   val required = requiredJavaVersion
   val current = sys.props("java.specification.version")
   assert(current == required, s"Unsupported JDK: java.specification.version $current != $required")
+
+  import java.util.Properties
+  import scala.collection.JavaConverters._
+
+//  val envProperties = settingKey[Properties]("env.properties")
+//
+//  envProperties := {
+  val prop = new Properties()
+  IO.load(prop, new File("env.properties"))
+  prop.entrySet().asScala.foreach {
+    (entry) => {
+      sys.props += ((entry.getKey.asInstanceOf[String], entry.getValue.asInstanceOf[String]))
+    }
+  }
+//    prop
+  //  }
 }
 
 resolvers += Resolver.bintrayRepo("jfrog", "bintray-tools")
-resolvers += Resolver.url("bintray-sbt-plugins", url("https://dl.bintray.com/sbt/sbt-plugin-releases/"))(Resolver.ivyStylePatterns)
+//resolvers += Resolver.url("bintray-sbt-plugins", url("https://dl.bintray.com/sbt/sbt-plugin-releases/"))(Resolver.ivyStylePatterns)
 
 scalacOptions += "-target:jvm-" + requiredJavaVersion
 javacOptions ++= Seq("-source", requiredJavaVersion, "-target", requiredJavaVersion, "-Xlint")
@@ -53,7 +70,7 @@ lazy val root = (project in file(".")).
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
     buildInfoPackage := "hu.blackbelt.cd.bintray.deploy",
 
-    publishTo := Some(Resolver.file("file", new File(target.value.absolutePath + "/publish"))),
+    //    publishTo := Some(Resolver.file("file", new File(target.value.absolutePath + "/publish"))),
 
     assemblyJarName in assembly := s"${name.value}-${releaseVersion.value}.jar",
 
@@ -65,6 +82,13 @@ lazy val root = (project in file(".")).
 
     git.useGitDescribe := true,
     git.baseVersion := "0.0.0",
+
+    s3region := com.amazonaws.services.s3.model.Region.EU_Frankfurt,
+    s3acl := com.amazonaws.services.s3.model.CannedAccessControlList.Private,
+
+    publishMavenStyle := false,
+
+    publishTo := Some(s3resolver.value("blackbelt-lambdas S3 bucket", s3("blackbelt-lambdas")) withIvyPatterns),
 
     releaseProcess := Seq(
       checkSnapshotDependencies,

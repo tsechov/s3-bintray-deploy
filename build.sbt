@@ -75,11 +75,14 @@ lazy val root = (project in file(".")).
 
     assemblyJarName in assembly := s"${name.value}-${releaseVersion.value}.jar",
 
-    mappings in Universal <<= (mappings in Universal, assembly in Compile) map { (mappings, fatJar) =>
-      val filtered = mappings filter { case (file, name) => !name.endsWith(".jar") }
-      filtered :+ (fatJar -> ("lib/" + fatJar.getName))
-    },
-    scriptClasspath := Seq((assemblyJarName in assembly).value),
+//    mappings in Universal <<= (mappings in Universal, assembly in Compile) map { (mappings, fatJar) =>
+//      val filtered = mappings filter { case (file, name) => !name.endsWith(".jar") }
+//      filtered :+ (fatJar -> ("lib/" + fatJar.getName))
+//    },
+//    scriptClasspath := Seq((assemblyJarName in assembly).value),
+
+    addArtifact(artifact in (Compile, assembly), assembly),
+
 
     git.useGitDescribe := true,
     git.baseVersion := "0.0.0",
@@ -92,6 +95,7 @@ lazy val root = (project in file(".")).
       setReleaseVersion,
       runTest,
       tagRelease,
+
       ReleaseStep(releaseStepTask(publish in assembly)),
       pushChanges,
       setNextVersion,

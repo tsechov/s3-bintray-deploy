@@ -47,11 +47,13 @@ object TarGzExtract {
     }.getOrElse(Seq())
   }
 
-  private def listPomDirs(dir: String) = list(new File(dir), _.getName.endsWith(".pom")).map(_.getParent)
+  private def isPomFile(file: File) = file.getName.endsWith(".pom")
 
-  private def getJarFromPomDir(dir: String) = {
+  private def listPomDirs(dir: String) = list(new File(dir), isPomFile).map(_.getParent)
+
+  private def getJarByPomFromDir(dir: String) = {
     val files = new File(dir).listFiles()
-    val poms = files.filter(f => f.isFile && f.getName.endsWith(".pom"))
+    val poms = files.filter(f => f.isFile && isPomFile(f))
     poms.map { pomFile =>
 
       val model = new MavenXpp3Reader().read(new FileReader(pomFile))
@@ -61,8 +63,11 @@ object TarGzExtract {
       val artifactId = model.getArtifactId
       val version = Option(model.getVersion).getOrElse(model.getParent.getVersion)
 
-      val packaging = if (model.getPackaging == "bundle") "jar" else model.getPackaging
-
+      val packaging = model.getPackaging match {
+        case "bundle" => "jar"
+        case "karaf-assembly" => "tar.gz"
+        case anythingElse => anythingElse
+      }
       files.find(f => f.getName.endsWith(s".$packaging") && !f.getName.endsWith(s"-sources.$packaging")).map(
         Art(groupId, artifactId, version, _, pomFile)
       )
@@ -71,5 +76,5 @@ object TarGzExtract {
   }
 
 
-  def getArtifacts(archive: InputStream) = TarGzExtract.listPomDirs(TarGzExtract.extract(archive)).map(TarGzExtract.getJarFromPomDir).filter(_.isDefined).map(_.get)
+  def getArtifacts(archive: InputStream) = TarGzExtract.listPomDirs(TarGzExtract.extract(archive)).map(TarGzExtract.getJarByPomFromDir).filter(_.isDefined).map(_.get)
 }

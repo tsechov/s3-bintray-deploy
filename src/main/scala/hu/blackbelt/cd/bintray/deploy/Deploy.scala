@@ -14,7 +14,7 @@ class Deploy(project: Project) extends LazyLogging {
 
   logger.info("collecting access properties")
   Access.collect
-  logger.info("access info in posession")
+  logger.info("access info in possession")
 
 
   def fetch = S3Get.get(project.location.bucket, project.location.key)_

@@ -6,7 +6,7 @@ import org.scalatest.FunSuite
 
 class E2ETest extends FunSuite with Creds {
 
-  test("download-extract-upload") {
+  ignore("download-extract-upload") {
 
     val project = "judo"
     val version = "1.0.638"

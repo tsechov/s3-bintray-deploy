@@ -6,7 +6,7 @@ import org.scalatest.FunSuite
 
 class TarGzExtractTest extends FunSuite {
 
-  test("testExtract") {
+  test("testGetArtifacts") {
 
     val archive = new File("src/test/resources/test.tar.gz")
 
@@ -18,6 +18,19 @@ class TarGzExtractTest extends FunSuite {
     assert(results.size == 10)
 
 
+  }
+
+  test("testExtract") {
+
+    val archive = new File("src/test/resources/test.tar.gz")
+
+    println(s"extracting $archive")
+
+    val results = TarGzExtract.extract(new FileInputStream(archive))
+    val files = TarGzExtract.list(results)
+    files foreach println
+
+    assert(files.size == 120)
 
 
   }

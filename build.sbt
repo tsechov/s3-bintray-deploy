@@ -59,6 +59,7 @@ lazy val root = (project in file(".")).
       "org.apache.maven" % "maven-model" % mavenVersion,
       "org.apache.maven" % "maven-core" % mavenVersion,
       "org.apache.maven" % "maven-artifact" % mavenVersion,
+      "com.google.jimfs" % "jimfs" % "1.1",
       "org.scalatest" % "scalatest_2.11" % "2.2.6" % "test"
 
     ).map(_.exclude("commons-logging", "commons-logging")),

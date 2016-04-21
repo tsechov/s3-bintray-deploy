@@ -1,7 +1,8 @@
 package hu.blackbelt.cd.bintray.deploy
 
 import java.io.{File, FileInputStream}
-import java.util.Properties
+import java.nio.file.{StandardCopyOption, Path, Files}
+import java.util.{UUID, Properties}
 
 import awscala.s3.S3
 import com.amazonaws.regions.{Regions, Region}
@@ -17,11 +18,17 @@ object Access {
 
   def collect = {
     implicit val s3 = S3()(com.amazonaws.regions.Region.getRegion(Regions.EU_CENTRAL_1))
-    val accessFile = File.createTempFile("props", ".tmp");
-    s3.getObject(new GetObjectRequest("blackbelt-secrets", "bintray-deploy/access.properties"), accessFile)
+
+
+
+    val destination = FS.getPath(s"/tmp/${UUID.randomUUID().toString}")
+    Files.createDirectories(destination)
+    val s3Object = s3.getObject(new GetObjectRequest("blackbelt-secrets", "bintray-deploy/access.properties"))
+    Files.copy(s3Object.getObjectContent, destination, StandardCopyOption.REPLACE_EXISTING)
+
     import scala.collection.JavaConverters._
     val prop = new Properties()
-    prop.load(new FileInputStream(accessFile))
+    prop.load(Files.newInputStream(destination))
     prop.entrySet().asScala.foreach {
       (entry) => {
         sys.props += ((entry.getKey.asInstanceOf[String], entry.getValue.asInstanceOf[String]))

@@ -1,6 +1,7 @@
 package hu.blackbelt.cd.bintray.deploy
 
 import java.io.{BufferedInputStream, File, FileInputStream}
+import java.nio.file.{Files, Path}
 
 import com.jfrog.bintray.client.api.details.VersionDetails
 import com.jfrog.bintray.client.api.handle.VersionHandle
@@ -14,7 +15,7 @@ import scala.util.Try
 
 case class Ver(handle: VersionHandle)
 
-case class Batch(files: Seq[(String, File)])
+case class Batch(files: Seq[(String, Path)])
 
 class Btray extends LazyLogging {
   val subject: String = sys.props.get(Access.bintray_organization).get
@@ -52,7 +53,7 @@ class Btray extends LazyLogging {
       override def call(): Unit = {
         for (f <- batch.files) {
           logger.info(s"[{}] uploading to version[{}]: {}", Thread.currentThread.getName, v.handle.get.name, f._1)
-          v.handle.upload(f._1, new BufferedInputStream(new FileInputStream(f._2)))
+          v.handle.upload(f._1, new BufferedInputStream(Files.newInputStream(f._2)))
           logger.info(s"[{}] uploaded: {}", Thread.currentThread.getName, f._1)
         }
       }

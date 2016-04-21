@@ -1,6 +1,7 @@
 package hu.blackbelt.cd.bintray.deploy
 
 import java.io.{InputStream, File}
+import java.nio.file.{Paths, Files}
 
 import com.typesafe.scalalogging.LazyLogging
 
@@ -23,7 +24,7 @@ class Deploy(project: Project) extends LazyLogging {
     val artifacts = TarGzExtract.getArtifacts(archive)
     val batches = artifacts.sliding(batchSize, batchSize).map(arts => {
       val mapped = arts.map { art =>
-        val key = s"${art.groupId.replace('.', '/')}/${art.artifactId}/${art.version}/${art.artifact.getName}"
+        val key = s"${art.groupId.replace('.', '/')}/${art.artifactId}/${art.version}/${art.artifact.getFileName}"
         (key, art.artifact)
       }
       Batch(mapped)

@@ -65,7 +65,7 @@ object TarGzExtract {
 
       val packaging = model.getPackaging match {
         case "bundle" => "jar"
-        case "karaf-assembly" => "tar.gz"
+        case "karaf-assembly" => "zip"
         case anythingElse => anythingElse
       }
       files.find(f => f.getName.endsWith(s".$packaging") && !f.getName.endsWith(s"-sources.$packaging")).map(

@@ -52,9 +52,9 @@ class Btray extends LazyLogging {
     val cs = batches.map(batch => Completable.fromAction(new Action0 {
       override def call(): Unit = {
         for (f <- batch.files) {
-          logger.info(s"[{}] uploading to version[{}]: {}", Thread.currentThread.getName, v.handle.get.name, f._1)
+          logger.debug(s"[{}] uploading to version[{}]: {}", Thread.currentThread.getName, v.handle.get.name, f._1)
           v.handle.upload(f._1, new BufferedInputStream(Files.newInputStream(f._2)))
-          logger.info(s"[{}] uploaded: {}", Thread.currentThread.getName, f._1)
+          logger.debug(s"[{}] uploaded: {}", Thread.currentThread.getName, f._1)
         }
       }
     }).subscribeOn(Schedulers.computation())).asJavaCollection
@@ -78,35 +78,7 @@ class Btray extends LazyLogging {
       }
     }).await()
 
-    //    val o = batches.map(withBatches).toObservable.flatten
-    //      .subscribe(b => {
-    //        next(b)
-    //      })
 
-    //      .subscribe({ batch =>
-    //      for (b <- batch.files) {
-    //        println("BBBBBBBBAAAAAAAAAAAAAAA")
-    //        println(s"[${Thread.currentThread.getName}] uploading to version[${v.handle.get.name}]: $b")
-    //        //v.handle.upload(b._1, new BufferedInputStream(new FileInputStream(b._2)))
-    //
-    //      }
-    //    })
-
-    //        o.subscribe(onNext = { batch =>
-    //          for (b <- batch.files) {
-    //            println(s"[${Thread.currentThread().getName}] uploading to version[${v.handle.get.name}]: $b")
-    //            v.handle.upload(b._1, new BufferedInputStream(new FileInputStream(b._2)))
-    //
-    //          }
-    //        }, onError = { e =>
-    //          println(s"ERROR[$e];\ndeleting version[${v.handle.get.name}]")
-    //          v.handle.delete
-    //
-    //        }, onCompleted = { () =>
-    //          println(s"publishing version[${v.handle.get.name}]")
-    //          v.handle.publish
-    //
-    //        })
 
   }
 

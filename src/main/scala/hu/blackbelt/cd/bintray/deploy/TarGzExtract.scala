@@ -5,16 +5,27 @@ import java.nio.file.{Files, Path}
 import java.util.UUID
 import java.util.stream.Collectors
 
+import hu.blackbelt.cd.bintray.VFS.FS
 import org.apache.commons.compress.archivers.{ArchiveEntry, ArchiveInputStream, ArchiveStreamFactory}
-import org.apache.commons.compress.compressors.CompressorStreamFactory
+import org.apache.commons.compress.compressors.{CompressorInputStream, CompressorStreamFactory}
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.rauschig.jarchivelib.IOUtils
 
+import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 
 case class Art(groupId: String, artifactId: String, version: String, artifact: Path, pomFile: Path)
 
 object TarGzExtract {
+  @tailrec
+  private def entries(acc: Stream[ArchiveEntry], source: ArchiveInputStream): Stream[ArchiveEntry] = {
+    Option(source.getNextEntry) match {
+      case None => acc
+      case Some(e) => entries(e #:: acc, source)
+    }
+
+  }
+
   def extract(archive: InputStream): Path = {
     val destDirName = s"/tmp/${UUID.randomUUID().toString}"
 
@@ -22,20 +33,22 @@ object TarGzExtract {
 
     val compressorInput = new CompressorStreamFactory().createCompressorInputStream(new BufferedInputStream(archive))
 
+
+
+    extractInternal(destination, compressorInput)
+
+
+    destination
+  }
+
+  private def extractInternal2(destination: Path, compressorInput: CompressorInputStream): Unit = {
     var archiveInput: ArchiveInputStream = null
     try {
       archiveInput = new ArchiveStreamFactory().createArchiveInputStream("tar", compressorInput)
-      var entry: ArchiveEntry = null
-      while ((({
-        entry = archiveInput.getNextEntry;
-        entry
-      })) != null) {
+      entries(Stream.empty, archiveInput).foreach { entry =>
         val path: Path = destination.resolve(entry.getName)
-
         if (entry.isDirectory) {
-          if (!Files.exists(path)) {
-            Files.createDirectories(path)
-          }
+          Files.createDirectories(path)
         }
         else {
           Files.createDirectories(path.getParent)
@@ -46,8 +59,32 @@ object TarGzExtract {
       IOUtils.closeQuietly(archiveInput)
     }
 
+  }
 
-    destination
+  private def extractInternal(destination: Path, compressorInput: CompressorInputStream): Unit = {
+    var archiveInput: ArchiveInputStream = null
+    try {
+      archiveInput = new ArchiveStreamFactory().createArchiveInputStream("tar", compressorInput)
+
+
+      var entry: ArchiveEntry = null
+      while ((({
+        entry = archiveInput.getNextEntry;
+        entry
+      })) != null) {
+        val path: Path = destination.resolve(entry.getName)
+
+        if (entry.isDirectory) {
+            Files.createDirectories(path)
+        }
+        else {
+          Files.createDirectories(path.getParent)
+          Files.copy(archiveInput, path)
+        }
+      }
+    } finally {
+      IOUtils.closeQuietly(archiveInput)
+    }
   }
 
   def list(dir: Path, filter: Path => Boolean = _ => true): Seq[Path] = {
@@ -60,8 +97,8 @@ object TarGzExtract {
   }
 
   private def fileNameEndsWith(path: Path, suffix: String) = path.getFileName.toString.endsWith(suffix)
-  private def isPomFile(file: Path) = fileNameEndsWith(file, ".pom")
 
+  private def isPomFile(file: Path) = fileNameEndsWith(file, ".pom")
 
 
   private def listPomDirs(dir: Path) = list(dir, isPomFile).map(_.getParent)

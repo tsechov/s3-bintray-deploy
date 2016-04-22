@@ -1,19 +1,19 @@
 package hu.blackbelt.cd.bintray.deploy
 
-import java.io.{File, FileInputStream}
-import java.nio.file.{StandardCopyOption, Path, Files}
-import java.util.{UUID, Properties}
+import java.nio.file.{Files, StandardCopyOption}
+import java.util.{Properties, UUID}
 
 import awscala.s3.S3
-import com.amazonaws.regions.{Regions, Region}
-import com.amazonaws.services.s3.model.{GetObjectRequest}
+import com.amazonaws.regions.Regions
+import com.amazonaws.services.s3.model.GetObjectRequest
+import hu.blackbelt.cd.bintray.VFS.FS
 
 object Access {
   val bintray_organization = "bintray.organization"
   val bintray_user = "bintray.user"
   val bintray_apikey = "bintray.apikey"
   val aws_accessKeyId = "aws.accessKeyId"
-  val aws_secretKey="aws.secretKey"
+  val aws_secretKey = "aws.secretKey"
 
 
   def collect = {

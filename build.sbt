@@ -69,7 +69,12 @@ lazy val root = (project in file(".")).
     buildInfoPackage := "hu.blackbelt.cd.bintray.deploy",
 
     assemblyMergeStrategy in assembly := {
-      case PathList("META-INF", xs@_*) => MergeStrategy.discard
+
+      case PathList("META-INF", xs@_*) =>
+        (xs map {_.toLowerCase}) match {
+          case "services" :: xs => MergeStrategy.filterDistinctLines
+          case _ => MergeStrategy.discard
+        }
       case x => MergeStrategy.first
     },
 

@@ -1,0 +1,10 @@
+
+
+before_script:
+  - apt-get update -y
+  - apt-get install default-jre -y
+  - java -version
+
+test:
+  script:
+    - sbt test

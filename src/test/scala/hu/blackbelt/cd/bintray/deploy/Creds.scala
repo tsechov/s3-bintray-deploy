@@ -9,7 +9,7 @@ trait Creds extends BeforeAndAfter {
   this: Suite =>
 
   def fillFromEnv(prop: Properties) = {
-    def put(key: String) = sys.env.get(key).map(prop.put(key, _))
+    def put(key: String) = sys.env.get(key.replace('.','_')).map(prop.put(key.replace('_','.'), _))
     put(Access.aws_accessKeyId)
     put(Access.aws_secretKey)
     put(Access.bintray_organization)

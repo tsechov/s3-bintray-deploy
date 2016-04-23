@@ -2,8 +2,11 @@
 
 before_script:
   - apt-get update -y
-  - apt-get install default-jre -y
+  - apt-get install openjdk-8-jdk curl -y
   - java -version
+  - wget https://bintray.com/artifact/download/sbt/debian/sbt-0.13.8.deb
+  - dpkg -i sbt-0.13.8.deb
+  - sbt --version
 
 test:
   script:

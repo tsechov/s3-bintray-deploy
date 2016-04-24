@@ -1,15 +1,5 @@
 
 
-before_script:
-  - docker version
-  - echo "deb http://ftp.de.debian.org/debian jessie-backports main" >> /etc/apt/sources.list
-  - apt-get update -y
-  - apt-get install openjdk-8-jdk curl -y
-  - java -version
-  - wget https://bintray.com/artifact/download/sbt/debian/sbt-0.13.8.deb
-  - dpkg -i sbt-0.13.8.deb
-
-
 test:
   script:
     - sbt test
